@@ -35,7 +35,7 @@ body {
 .cart-container {
     position: absolute;
     top: 0;
-    right: 0;
+    right: -1000px;
     transform: rotateZ(0deg);
     width: 30%;
     margin: 1em;
