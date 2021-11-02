@@ -1,9 +1,9 @@
 let total;
 let subtotal;
-const DISCOUNTED_SUBTOTAL = 1000;
+const DISCOUNTED_SUBTOTAL = 5000;
 const SHIPPING_COST = 20;
 
-const products = [
+let products = [
     {   
         id: 1,
         name: "Monitor",
@@ -22,7 +22,7 @@ const products = [
         id: 3,
         name: "Laptop",
         image: "./produs3.jpg",
-        price: 2200,
+        price: 1500,
         quantity: 1
     }
 ];
@@ -48,12 +48,15 @@ function updateCart() {
                                 <p>Price: $${p.price}</p>
                             </div>
                             <div class="cart-controls">
-                                <button class="btn" id="plus-item${p.id}" value="${p.id - 1}">+</button>
+                                <button class="btn" id="plus-item${p.id}" value="${i}">+</button>
                                 <input type="text" id="name" name="name" minlength="1" maxlength="1" value="${p.quantity}">
-                                <button class="btn" id="min-item${p.id}" value="${p.id - 1}">-</button>
+                                <button class="btn" id="min-item${p.id}" value="${i}">-</button>
                             </div>
                             <div class="cart-price">
                                 <p>$${p.price * p.quantity}</p>
+                            </div>
+                            <div class="cart-delete">
+                                <button onclick="deleteElement(${i})"><i class='bx bxs-trash'></i></button>
                             </div>
                         </div>`;
         } else {
@@ -72,12 +75,15 @@ function updateCart() {
                                 <p>Price: $${p.price}</p>
                             </div>
                             <div class="cart-controls">
-                                <select class="cart-select" name="${p.id - 1}">  
+                                <select class="cart-select" name="${i}">  
                                     ${options}
                                 </select>
                             </div>
                             <div class="cart-price">
                                 <p>$${p.price * p.quantity}</p>
+                            </div>
+                            <div class="cart-delete">
+                                <button onclick="deleteElement(${i})"><i class='bx bxs-trash'></i></button>
                             </div>
                         </div>`;
         }
@@ -132,17 +138,88 @@ const shoppingCart = document.querySelector(".cart-container");
 const closeCartBtn = document.getElementById("closeShoppingCart");
 const overlay = document.getElementById("overlay");
 
-cartBtn.addEventListener("click", function() {
-    shoppingCart.classList.add("open");
-    shoppingCart.classList.remove("close");
-    overlay.classList.add("overlay-on");
-    overlay.classList.remove("overlay-off");
+// closing and opening modal
+const modal = document.querySelector('.modal');
 
+cartBtn.addEventListener("click", function() {
+    showCart(true);
+    showOverlay(true);
 });
+
+// showing overlay
+function showOverlay(visible) {
+    if(visible) {
+        overlay.classList.add("overlay-on");
+        overlay.classList.remove("overlay-off");
+    } else {
+        overlay.classList.add("overlay-off");
+        overlay.classList.remove("overlay-on");
+    }
+}
+
+// showing cart
+function showCart(visible) {
+    if(visible) {
+        shoppingCart.classList.add("open");
+        shoppingCart.classList.remove("close");
+    } else {
+        shoppingCart.classList.add("close");
+        shoppingCart.classList.remove("open");    
+    }
+}
+
+// showing modal
+function showModal(visible) {
+    if(visible) {
+        modal.classList.add("modal-show");
+        modal.classList.remove("modal-off");    
+    } else {
+        modal.classList.add("modal-off");
+        modal.classList.remove("modal-show");    
+    }
+}
 
 closeCartBtn.addEventListener("click", function() {
-    shoppingCart.classList.add("close");
-    shoppingCart.classList.remove("open");    
-    overlay.classList.add("overlay-off");
-    overlay.classList.remove("overlay-on");
+    showCart(false);
+    showOverlay(false);
 });
+
+// was the ok buttons pressed?
+let isConfirmed = false;
+let deleteItemPosition = -1;
+
+// getting modal buttons
+const btnModalOk = document.querySelector("#btn-modal-ok");
+const btnModalCancel = document.querySelector("#btn-modal-cancel");
+btnModalCancel.addEventListener("click", function() {
+    showModal(false);
+    showCart(true);
+    showOverlay(true);
+});
+
+// if ok button is pressed
+btnModalOk.addEventListener("click", function() {
+    isConfirmed = true;
+    console.log("Ok button is pressed: " + isConfirmed);
+    showModal(false);
+    showCart(true);
+    showOverlay(true);    
+    if (isConfirmed && deleteItemPosition !== -1) {
+        console.log("delete at " + deleteItemPosition);
+        console.log("Elementul de la " + deleteItemPosition + " va fi sters!");
+        products.splice(deleteItemPosition, 1);
+        console.log(products);
+        isConfirmed = false;
+        deleteItemPosition = -1;
+        updateCart();
+    }
+});
+
+
+// deleting element at i
+function deleteElement(i) {
+    showCart(false);
+    showOverlay(true);
+    showModal(true);
+    deleteItemPosition = i;
+}

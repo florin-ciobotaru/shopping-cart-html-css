@@ -11,7 +11,7 @@ body {
     overflow-x: hidden;
 }
 
-.cart-title {
+.cart-title, .modal-title {
     font-weight: 500;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     text-align: center;
@@ -26,6 +26,11 @@ body {
 }
 .col {
     flex: 1;
+}
+
+.gap {
+    row-gap: 2em;
+    column-gap: 2em;
 }
 
 .free {
@@ -44,7 +49,7 @@ body {
     border-radius: .3em;
     background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-    z-index: 1000;
+    z-index: 999;
 }
 
 .spacing {
@@ -309,3 +314,77 @@ footer {
     margin-top: 2em;
     text-align: center;
 }
+
+/* delete modal */
+.modal {
+    z-index: 1000;
+    position: absolute;
+    opacity: 0;
+    border-radius: .3em;
+    background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  
+}
+.modal-off {   
+    animation-name: slideOut;
+    animation-duration: .5s;
+    animation-iteration-count: 1;        
+    left: 200%;
+    top: 200%;
+    opacity: 1;
+}
+.modal-show {
+    animation-name: slideIn;
+    animation-duration: .5s;
+    animation-iteration-count: 1;
+    opacity: 1;
+    margin: auto; 
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);  
+}
+
+.cart-delete > button {
+    border: none;
+    font-size: 1.4em;
+    color: #2c3e50;
+    cursor: pointer;
+    background: none;
+}
+
+.cart-delete > button:hover {
+    color: #f09819;
+}
+
+
+/* animations for modal */
+@keyframes slideIn {
+    0% {
+        display: block;
+        left: 200%;
+        top: 200%;
+        opacity: 0;
+    }
+    100% {
+        left: 50%;
+        top: 50%;
+    }
+  }
+
+
+@keyframes slideOut {
+    0% {
+        left: 50%;
+        top: 50%;
+    }
+    99% {
+        left: 200%;
+        top: 200%;
+    }
+    100% {        
+        display: none;
+        left: 200%;
+        top: 200%;
+        opacity: 0;
+    }
+  }
