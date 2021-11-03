@@ -3,29 +3,32 @@ let subtotal;
 const DISCOUNTED_SUBTOTAL = 5000;
 const SHIPPING_COST = 20;
 
-let products = [
-    {   
-        id: 1,
-        name: "Monitor",
-        image: "./produs1.jpg",
-        price: 800,
-        quantity: 1
-    },
-    {   
-        id: 2,
-        name: "PC",
-        image: "./produs2.jpg",
-        price: 1200,
-        quantity: 1
-    },
-    {   
-        id: 3,
-        name: "Laptop",
-        image: "./produs3.jpg",
-        price: 1500,
-        quantity: 1
-    }
-];
+let products = [];
+
+if(getDataFromLocalStorage()) {
+    products = getDataFromLocalStorage();
+} else {
+    products = [
+        {   
+            name: "Monitor",
+            image: "./produs1.jpg",
+            price: 800,
+            quantity: 1
+        },
+        {   
+            name: "PC",
+            image: "./produs2.jpg",
+            price: 1200,
+            quantity: 1
+        },
+        {   
+            name: "Laptop",
+            image: "./produs3.jpg",
+            price: 1500,
+            quantity: 1
+        }
+    ];
+}
 
 updateCart();
 
@@ -48,9 +51,9 @@ function updateCart() {
                                 <p>Price: $${p.price}</p>
                             </div>
                             <div class="cart-controls">
-                                <button class="btn" id="plus-item${p.id}" value="${i}">+</button>
+                                <button class="btn" id="plus-item${i}" value="${i}">+</button>
                                 <input type="text" id="name" name="name" minlength="1" maxlength="1" value="${p.quantity}">
-                                <button class="btn" id="min-item${p.id}" value="${i}">-</button>
+                                <button class="btn" id="min-item${i}" value="${i}">-</button>
                             </div>
                             <div class="cart-price">
                                 <p>$${p.price * p.quantity}</p>
@@ -100,10 +103,21 @@ function updateCart() {
             <p class="col spacing">Subtotal: $${subtotal}</p>
             <p class="col spacing">Shipping: $${SHIPPING_COST}</p>
         </div>
-        <p class="spacing">Total: $${total}</p>
+        <div class="row">
+            <p class="col spacing">Total: $${total}</p>
+            <button id="btn-add" class="col spacing btn-order">Add item</button>
+        </div>
         <p class="spacing free">* Free shipping on orders over $${DISCOUNTED_SUBTOTAL}</p>
     `;
 
+        
+    // adding a new item
+    const btnAdd = document.querySelector("#btn-add");
+    btnAdd.addEventListener("click", function() {
+        addNewItem();
+    });
+
+    saveDataToLocalStorage();
 }
 
 function placeBtns() {
@@ -191,35 +205,122 @@ let deleteItemPosition = -1;
 // getting modal buttons
 const btnModalOk = document.querySelector("#btn-modal-ok");
 const btnModalCancel = document.querySelector("#btn-modal-cancel");
+
+// getting modal content to show the item to delete
+const modalContent = document.querySelector('.modal-content');  
+const modalTitle = document.querySelector('.modal-title');
+
 btnModalCancel.addEventListener("click", function() {
     showModal(false);
     showCart(true);
     showOverlay(true);
 });
 
+// added object
+let objectToAdd = {   
+    name: "",
+    image: "./produs1.jpg",
+    price: 0,
+    quantity: 1
+};
+
 // if ok button is pressed
-btnModalOk.addEventListener("click", function() {
-    isConfirmed = true;
-    console.log("Ok button is pressed: " + isConfirmed);
+btnModalOk.addEventListener("click", function(ev) {
+    let choice = ev.target.textContent.toLowerCase();
+    console.log(choice);
     showModal(false);
     showCart(true);
-    showOverlay(true);    
-    if (isConfirmed && deleteItemPosition !== -1) {
-        console.log("delete at " + deleteItemPosition);
-        console.log("Elementul de la " + deleteItemPosition + " va fi sters!");
-        products.splice(deleteItemPosition, 1);
-        console.log(products);
-        isConfirmed = false;
-        deleteItemPosition = -1;
-        updateCart();
+    showOverlay(true);  
+
+    switch (choice) {
+        case "add":
+            products.push(objectToAdd);
+            objectToAdd = {   
+                name: "",
+                image: "./produs1.jpg",
+                price: 0,
+                quantity: 1
+            };
+            break;
+        case "delete":         
+            isConfirmed = true;
+            if (isConfirmed && deleteItemPosition !== -1) {
+                products.splice(deleteItemPosition, 1);
+                isConfirmed = false;
+                deleteItemPosition = -1;
+            }
+            break;
+        default:
+            break;
     }
+    updateCart();
 });
 
 
 // deleting element at i
 function deleteElement(i) {
+    let p = products[i];
+    btnModalOk.classList.add("danger");
+    btnModalOk.classList.remove("info");
+    btnModalOk.textContent = "Delete";
+
+    modalTitle.textContent = "Are you sure ?";
+    modalContent.innerHTML = `<p class="spacing">The product you want to remove:</p>
+                            <div class="cart-item spacing">
+                                <img src="${p.image}" alt="${p.name}" class="cart-img">
+                                <div class="cart-description">
+                                    <p>${p.name}</p>
+                                    <p>Price: $${p.price}</p>
+                                </div>
+                                <div class="cart-controls">
+                                    <input type="text" id="name" name="name" minlength="1" maxlength="1" value="${p.quantity}" disabled>
+                                </div>
+                                <div class="cart-price">
+                                    <p>$${p.price * p.quantity}</p>
+                                </div>
+                            </div>`;
     showCart(false);
     showOverlay(true);
     showModal(true);
     deleteItemPosition = i;
+}
+
+function addNewItem() {
+    console.log("Add new item called!");
+    showOverlay(true);
+    showModal(true);
+    showCart(false);
+    modalTitle.textContent = "Add a new item";
+    modalContent.innerHTML = `
+        <div class="row">Product name:</div>
+        <div class="row">
+            <input type="text" id="name" name="name" onkeyup="updateObjectInputs(this)" class="col" value="${objectToAdd.name}">
+        </div>
+        <div class="row">Image link for the product:</div>
+        <div class="row">
+            <input type="text" id="image" name="image" onkeyup="updateObjectInputs(this)" class="col" value="${objectToAdd.image}">
+        </div>
+        <div class="row">Price:</div>
+        <div class="row">
+            <input type="text" id="price" name="price" class="col" onkeyup="updateObjectInputs(this)" value="${objectToAdd.price}">
+        </div>
+    `;
+
+    btnModalOk.classList.add("info");
+    btnModalOk.classList.remove("danger");
+    btnModalOk.textContent = "Add";
+    updateCart();
+}
+
+// update objectToAdd properties
+function updateObjectInputs(ev) {
+    objectToAdd[ev.name] = ev.value;
+}
+
+function saveDataToLocalStorage() {
+    localStorage.setItem('products', JSON.stringify(products));
+}
+
+function getDataFromLocalStorage() {
+    return JSON.parse(localStorage.getItem('products'));
 }
